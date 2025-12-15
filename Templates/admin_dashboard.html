@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Admin – Verify Reports</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar"
+      class="w-64 shadow-lg bg-[#F8FBFC] fixed lg:static inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 flex flex-col">
+      <div class="mt-3 border-b bg-[#F8FBFC] flex justify-between items-center px-4">
+        <a href="/admin_dashboard"><img src="/static/image/logo.png" alt=""></a>
+        <button class="lg:hidden text-2xl mb-10" onclick="toggleSidebar()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <nav class="flex-1 bg-[#F8FBFC] p-6 space-y-4">
+        <a href="/admin_dashboard" class="block px-4 py-2 rounded bg-red-800 text-white font-semibold"><i
+            class="text-[18px] ri-shield-check-line"></i> Verify reports</a>
+        <a href="{{ url_for('admin_logout') }}"
+          class="block px-4 py-2 transition-all duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-arrow-left-box-line"></i> Logout
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="overflow-y-auto flex-1 p-6 lg:ml-0">
+
+      <!-- Top bar with hamburger -->
+      <div class="flex">
+        
+        <div class="flex items-center justify-between mb-6 lg:hidden">
+          <button onclick="toggleSidebar()" class="text-2xl me-2">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        <h2 class="text-2xl font-medium mb-6">Crime Reports for Verification</h2>
+      </div>
+
+      <!-- Stats Grid -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 lg:grid-cols-4">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-lg font-semibold mb-2">Total Crimes Reported</h3>
+          <div class="flex mt-5 justify-between">
+            <p class="text-3xl font-bold counter">{{ total_reports }}</p>
+            <i class="fas fa-chart-line text-red-700 text-3xl"></i>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-lg font-semibold mb-2">Verified Reports</h3>
+          <div class="flex mt-5 justify-between">
+            <p class="text-3xl font-bold counter">{{ verified_reports }}</p>
+            <i class="fas fa-shield-halved text-red-700 text-3xl"></i>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-lg font-semibold mb-2">Pending Reports</h3>
+          <div class="flex mt-5 justify-between">
+            <p class="text-3xl font-bold counter">{{ pending_reports }}</p>
+            <i class="fa-solid fa-hourglass-half text-red-700 text-3xl"></i>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+          <h3 class="text-lg font-semibold mb-2">Rejected Reports</h3>
+          <div class="flex mt-5 justify-between">
+            <p class="text-3xl font-bold counter">{{ rejected_reports }}</p>
+            <i class="fa-solid fa-ban text-red-700 text-3xl"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for report in reports %}
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+          <div class="flex justify-between items-start mb-3">
+            <span class="bg-yellow-200 text-yellow-900 text-xs font-semibold px-3 py-1 rounded-full">
+              {{ report['status'].capitalize() }}
+            </span>
+            <span class="text-sm text-gray-500">{{ report['date'] }}</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">{{ report['type'] }}</h3>
+          <p class="text-sm text-gray-600 mb-4">{{ report['description'] }}</p>
+          <div class="flex gap-2">
+            <button onclick="openMap({{ report['lat'] }}, {{ report['lng'] }})"
+              class="bg-red-800 text-white px-3 py-2 rounded hover:bg-red-900 text-sm">
+              View Location
+            </button>
+            {% if report['status'] == 'pending' %}
+            <form method="POST" action="/verify/{{ report['id'] }}">
+              <button type="submit" class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
+                Verify
+              </button>
+            </form>
+            <form method="POST" action="/reject/{{ report['id'] }}">
+              <button type="submit" class="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 text-sm">
+                Reject
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+
+  <!-- Map Modal -->
+  <div id="mapModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg w-11/12 md:w-2/3 h-3/4 flex flex-col">
+      <div class="flex justify-between items-center p-4 border-b">
+        <h3 class="text-lg font-semibold">Crime Location</h3>
+        <button onclick="closeMap()" class="text-red-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="map" class="flex-1"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      if (sidebar.classList.contains("-translate-x-full")) {
+        sidebar.classList.remove("-translate-x-full");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+      }
+    }
+
+    // Number Counter Animation
+    document.addEventListener("DOMContentLoaded", () => {
+      const counters = document.querySelectorAll('.counter');
+      const speed = 200;
+      counters.forEach(counter => {
+        const updateCount = () => {
+          const target = +counter.innerText;
+          let count = 0;
+          const increment = Math.ceil(target / speed);
+          const timer = setInterval(() => {
+            count += increment;
+            if (count >= target) {
+              counter.innerText = target;
+              clearInterval(timer);
+            } else {
+              counter.innerText = count;
+            }
+          }, 10);
+        };
+        updateCount();
+      });
+    });
+
+    let mapInstance;
+    function openMap(lat, lng) {
+      document.getElementById('mapModal').classList.remove('hidden');
+      setTimeout(() => {
+        if (!mapInstance) {
+          mapInstance = L.map('map').setView([lat, lng], 14);
+          const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+          const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+          const esriLabels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}');
+          const satelliteWithLabels = L.layerGroup([esriSat, esriLabels]);
+          streetLayer.addTo(mapInstance);
+          L.marker([lat, lng]).addTo(mapInstance);
+          L.control.layers({ "Street View": streetLayer, "Satellite View": satelliteWithLabels }).addTo(mapInstance);
+        } else {
+          mapInstance.setView([lat, lng], 14);
+          L.marker([lat, lng]).addTo(mapInstance);
+        }
+      }, 100);
+    }
+    function closeMap() {
+      document.getElementById('mapModal').classList.add('hidden');
+    }
+  </script>
+</body>
+
+</html>

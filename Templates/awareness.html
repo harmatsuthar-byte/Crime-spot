@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crime Spot – Awareness</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <style>
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar"class="sidebar fixed lg:static top-0 left-0 w-64 shadow-lg bg-[#F8FBFC] h-full z-50 lg:transform-none lg:flex flex-col">
+      <div class="mt-3 bg-[#F8FBFC] border-b flex justify-between items-center px-4">
+        <a href="/"><img src="/static/image/logo.png" alt="" class="w-full"></a>
+        <button id="closeSidebar" class="mb-10 lg:hidden text-2xl"><i class="ri-close-line"></i></button>
+      </div>
+      <nav class="flex-1 bg-[#F8FBFC] p-6 space-y-4">
+        <a href="/"
+          class="block px-4 py-2 rounded transition-all duration-500 rounded  bg-[#F6F1F1]  hover:bg-[#CF9CA0]"><i
+            class="text-[18px]  ri-dashboard-horizontal-line"></i> Dashboard</a>
+        <a href="/map" class="block px-4 py-2 transition-all duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-road-map-line"></i> Crime Map</a>
+        <a href="/report" class="block px-4 py-2 transition-all duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-survey-line"></i> Report Crime</a>
+        <a href="/awareness" class="block px-4 py-2 bg-red-800 text-white font-semibold ">
+          <i class="text-[18px] ri-megaphone-line"></i> Awareness</a>
+      </nav>
+      <div class="flex justify-center mb-6">
+        <a href="/admin_login" class="block underline text-center mt-[180px] transition-all duration-500 lg:mt-[100px]"> Continue as Admin <i class="ri-contract-right-line"></i></a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+      <section>
+        <div class="flex items-center gap-3">
+          <button id="openSidebar" class="lg:hidden text-2xl"><i class="ri-menu-line"></i></button>
+
+          <h2 class="text-xl sm:text-2xl lg:text-3xl font-medium p-2">Public Awareness & Safety Tips</h2>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow  space-y-3">
+          <p>At <strong>Crime Spot</strong>, we believe in empowering citizens with real-time information to stay awareand safe.By reporting crimes and accessing visual data, citizens and authorities can work together for a safer city.Our platform not only helps track incidents but also encourages community participation in crime prevention.Together, we can build a more secure and informed society.
+          </p>
+          <div class="text-sm text-gray-600"> <i>Data shown in this platform is crowd-sourced and verified by localadmin teams.</i> </div>
+        </div>
+      </section>
+
+      <!-- How to Use Crime Spot -->
+      <section>
+
+        <h3 class="text-2xl font-semibold mb-4">How to Use Crime Spot</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-white p-4 rounded shadow text-center">
+            <a href="/map"> <i class="ri-map-pin-line text-3xl text-red-700"></i>
+            </a>
+            <h4 class="font-bold mt-2">Check Live Map</h4>
+            <p class="text-sm">See recent crimes in your area.</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow text-center">
+            <a href="/map"> <i class="ri-filter-line text-3xl text-blue-600"></i></a>
+            <h4 class="font-bold mt-2">Apply Filters</h4>
+            <p class="text-sm">View crimes by type or category.</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow text-center">
+            <a href="/report">
+              <i class="ri-survey-line text-3xl text-green-600"></i></a>
+            <h4 class="font-bold mt-2">Report a Crime</h4>
+            <p class="text-sm">Submit details of an incident anonymously.</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow text-center">
+            <a href="/awareness"><i class="ri-shield-user-line text-3xl text-yellow-600"></i></a>
+            <h4 class="font-bold mt-2">Follow Tips</h4>
+            <p class="text-sm">Stay alert and follow safety guidelines.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Safety Tips -->
+      <div class="md:flex space-x-6 justify-between">
+        <section>
+          <h3 class="text-2xl font-semibold mb-4">General Safety Tips</h3>
+          <ul class="list-decimal pl-8 space-y-2 text-sm bg-white p-6 px-2 rounded-xl shadow max-w-4xl lg:space-y-5 lg:text-[16px]  lg:pl-10">
+            <li>Avoid walking alone late at night in poorly lit areas.</li>
+            <li>Always lock your vehicle and avoid leaving valuables visible inside.</li>
+            <li>Report any suspicious behavior to local authorities immediately.</li>
+            <li>Keep emergency contact numbers saved and accessible.</li>
+            <li>Educate children about personal safety and trusted adults.</li>
+          </ul>
+        </section>
+
+        <!-- Emergency Contacts -->
+        <section>
+          <h3 class="text-2xl font-semibold mb-4">Emergency Contacts</h3>
+          <table class="bg-white shadow rounded-xl table-auto md:w-[355px] lg:w-[512px] ">
+            <thead class="bg-gray-200 ">
+              <tr class=" ">
+                <th class="p-3 text-left rounded-tl-lg">Service</th>
+                <th class="p-3 text-left rounded-tr-lg">Number</th>
+              </tr>
+            </thead>
+            <tbody class="text-md ">
+              <tr>
+                <td class="p-[6px] px-4 ">Police</td>
+                <td class="p-[6px] px-4 ">100</td>
+              </tr>
+
+              <tr>
+                <td class="p-[6px] px-4 ">Ambulance</td>
+                <td class="p-[6px] px-4 ">108</td>
+              </tr>
+
+              <tr>
+                <td class="p-[6px] px-4 ">Fire Brigade</td>
+                <td class="p-[6px] px-4 ">101</td>
+              </tr>
+              <tr>
+                <td class="p-[6px] px-4 ">Cyber crime</td>
+                <td class="p-[6px] px-4 ">1030</td>
+              </tr>
+              <tr>
+                <td class="p-[6px] px-4 pb-[8px]">Women Helpline</td>
+                <td class="p-[6px] px-4 pb-[8px]">1091</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+      <!-- Awareness Poster -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-4">Awareness Posters</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 ">
+          <img src="/static/image/quick to click.png" alt="Poster 1" class="rounded shadow" width="100%">
+          <img src="/static/image/Data is worth gold.jpg" alt="Poster 2" class="rounded shadow h-[243px] w-[230px] lg:h-[360px] w-[330px]">
+          <img src="/static/image/Hate-Crime-poster-1-3.jpg" alt="Poster 3" class="rounded shadow h-[243px] lg:h-[360px] w-[330px]">
+        </div>
+      </section>
+
+      <!-- Awareness Video -->
+      <section>
+        <h3 class="text-2xl font-semibold mb-4">Watch & Learn</h3>
+        <div class="aspect-w-14 aspect-h-8 mb-4 bg-white rounded-xl shadow overflow-hidden">
+          <iframe width="100%" height="300" src="https://www.youtube.com/embed/bgbLdplCNjY?si=fF2UQ2_z4z-QwbPE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+
+      </section>
+    </main>
+  </div>
+</body>
+<script>
+  let sidebar = document.getElementById("sidebar");
+  document.getElementById("openSidebar").addEventListener("click", () => {
+    sidebar.classList.add("active");
+  });
+  document.getElementById("closeSidebar").addEventListener("click", () => {
+    sidebar.classList.remove("active");
+  });
+</script>
+
+</html>

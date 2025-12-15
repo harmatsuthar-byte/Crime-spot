@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crime Spot – Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #map {
+      height: 500px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-800">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-[#F8FBFC] shadow-lg hidden lg:flex flex-col bg-[#F8FBFC] fixed lg:static h-full z-50">
+      <div class="mt-3 border-b bg-[#F8FBFC] flex justify-between items-center px-4">
+        <a href="/"><img src="/static/image/logo.png" alt=""></a>
+        <button id="closeSidebar" class="mb-10 lg:hidden text-2xl">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <nav class="flex-1 p-6 space-y-4">
+        <a href="/" class="block px-4 py-2 transition-all bg-[#F6F1F1] duration-500 rounded hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-dashboard-horizontal-line"></i> Dashboard
+        </a>
+        <a href="/map" class="block px-4 py-2 rounded bg-red-800 text-white font-semibold">
+          <i class="text-[18px] m-1 ri-road-map-line"></i> Crime Map
+        </a>
+        <a href="/report" class="block px-4 py-2 transition-all duration-500 bg-[#F6F1F1] rounded hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-survey-line"></i> Report Crime
+        </a>
+        <a href="/awareness"
+          class="block px-4 py-2 transition-all duration-500 bg-[#F6F1F1] rounded hover:bg-[#CF9CA0]">
+          <i class="text-[18px] ri-megaphone-line"></i> Awareness
+        </a>
+      </nav>
+      <div class="w-[250px] flex align-center bg-[#F8FBFC] justify-center mb-6">
+        <a href="/admin_login" class="block underline text-center mt-[180px] transition-all duration-500">
+          Continue as Admin <i class="ri-contract-right-line"></i>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 lg:ml-0">
+      <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex items-center gap-4">
+          <button id="openSidebar" class="lg:hidden text-2xl">
+            <i class="ri-menu-line"></i>
+          </button>
+          <h2 class="text-3xl font-medium">Live Crime Map</h2>
+        </div>
+        <div class="flex gap-4">
+          <select id="crimeFilter" class="border px-4 py-2 rounded text-sm">
+            <option value="All">All Categories</option>
+            <option value="Theft">Theft</option>
+            <option value="Assault">Assault</option>
+            <option value="Robbery">Robbery</option>
+            <option value="Vandalism">Vandalism</option>
+            <option value="Cybercrime">Cybercrime</option>
+            <option value="Drug Offense">Drug Offense</option>
+            <option value="Other">Other</option>
+          </select>
+          <select id="mapType" class="border px-4 py-2 rounded text-sm">
+            <option value="crime">Point Map</option>
+            <option value="heat">Heatmap</option>
+          </select>
+        </div>
+      </header>
+
+      <div id="map" class="rounded shadow"></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <script>
+    let sidebar = document.getElementById("sidebar");
+    let openBtn = document.getElementById("openSidebar");
+    let closeBtn = document.getElementById("closeSidebar");
+
+    openBtn.addEventListener("click", () => {
+      sidebar.classList.remove("hidden");
+      sidebar.classList.add("flex");
+    });
+
+    closeBtn.addEventListener("click", () => {
+      sidebar.classList.remove("flex");
+      sidebar.classList.add("hidden");
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      let streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+      let esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+      let esriLabels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}');
+      let satelliteWithLabels = L.layerGroup([esriSat, esriLabels]);
+
+      let map = L.map('map', {
+        center: [26.2903, 73.0390],
+        zoom: 12,
+        layers: [streetLayer]
+      });
+
+      L.control.layers({
+        "Street View": streetLayer,
+        "Satellite View": satelliteWithLabels
+      }).addTo(map);
+
+      let allReports = [];
+      let currentMarkers = [];
+      let heatLayer;
+
+      function loadReports() {
+        fetch("/get_verified_reports")
+          .then(res => res.json())
+          .then(data => {
+            allReports = data;8
+            renderMap("crime", crimeFilter.value);
+          });
+      }
+
+      function renderMap(viewType, filterType) {
+        currentMarkers.forEach(marker => map.removeLayer(marker));
+        currentMarkers = [];
+        if (heatLayer) {
+          map.removeLayer(heatLayer);
+          heatLayer = null;
+        }
+
+        const filtered = filterType === "All" ? allReports : allReports.filter(r => r.type === filterType);
+
+        if (viewType === "crime") {
+          filtered.forEach(report => {
+            let popupContent = `<strong>${report.type}</strong>
+              <strong class="ms-[120px] font-semibold">${report.date}</strong><br/>
+              ${report.description}`;
+            let marker = L.marker([report.lat, report.lng])
+              .addTo(map)
+              .bindPopup(popupContent);
+            currentMarkers.push(marker);
+          });
+
+        } else if (viewType === "heat") {
+          let points = filtered.map(r => [r.lat, r.lng, 1]);
+          heatLayer = L.heatLayer(points, {
+            radius: 25,
+            blur: 10,
+            maxZoom: 14,
+            gradient: { 0.2: 'blue', 0.5: 'yellow', 1.0: 'red' }
+          }).addTo(map);
+        }
+      }
+
+      mapType.addEventListener("change", () => renderMap(mapType.value, crimeFilter.value));
+      crimeFilter.addEventListener("change", () => renderMap(mapType.value, crimeFilter.value));
+
+      loadReports();
+    });
+  </script>
+</body>
+
+</html>

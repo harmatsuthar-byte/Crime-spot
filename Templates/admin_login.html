@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – Crime Spot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#F8FBFC]">
+  <a href="/"><img class="ms-10 md:mt-5 ms-2" src="/static/image/logo.png" alt="" width="220px"></a>
+  <div class="bg-white shadow-lg w-full mx-auto rounded-xl p-8 font-sans text-gray-800 flex items-center justify-center min-h-full mt-2 md:w-[65%]">
+    <iframe class="hidden lg:block w-[55%] h-[400px]" src="https://lottie.host/embed/84128b89-ff04-47a5-b973-0581dcc9b372/Gd4LCFoYZi.lottie"></iframe>
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md bg-[url(https://i.pinimg.com/736x/f6/2e/7e/f62e7e78b168df264b9f55541938b5cf.jpg)] bg-cover  bg-no-repeat lg:w-[45%]">
+      <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      {% if category == "login_error" %}
+      <div id="login-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-4">
+        {{ message }}
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="/admin_login" class="space-y-4 ">
+        <div>
+          <label for="username" class="block font-semibold mb-1">Username</label>
+          <input type="text" name="username" id="username" class="w-full border p-2 rounded-md" placeholder="Enter username" required>
+        </div>
+
+        <div>
+          <label for="password" class="block font-semibold mb-1">Password</label>
+          <input type="password" name="password" id="password" class="w-full border p-2 rounded-md" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="w-full flex align-center justify-center bg-cover bg-no-repeat text-white rounded-md">
+          <img src="https://i.pinimg.com/1200x/2c/a6/92/2ca692c4ead5cf7db8f943ee314473d4.jpg" alt="" width="140px">
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-500 mt-2">Only authorized personnel allowed.</p>
+    </div>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      let msg = document.getElementById('login-error');
+      if (msg) msg.style.display = 'none';
+    }, 3000);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crime Spot – Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <style>
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans text-gray-900">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed lg:static top-0 left-0 w-64 shadow-lg bg-[#F8FBFC] h-full z-50 lg:transform-none lg:flex flex-col">
+      <div class="mt-3 bg-[#F8FBFC] border-b flex justify-between items-center px-4">
+        <a href="/"><img src="/static/image/logo.png" alt="" class="w-full"></a>
+        <button id="closeSidebar" class="mb-10 lg:hidden text-2xl"><i class="ri-close-line"></i></button>
+      </div>
+      <nav class="flex-1 bg-[#F8FBFC] p-6 space-y-4">
+        <a href="/" class="block px-4 py-2 rounded bg-red-800 text-white font-semibold"><i
+            class="text-[18px] m-1 ri-dashboard-horizontal-fill"></i> Dashboard</a>
+        <a href="/map" class="block px-4 py-2 transition duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]"><i
+            class="text-[18px] ri-road-map-line"></i> Crime Map</a>
+        <a href="/report" class="block px-4 py-2 transition duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]"><i
+            class="text-[18px] ri-survey-line"></i> Report Crime</a>
+        <a href="/awareness" class="block px-4 py-2 transition duration-500 rounded bg-[#F6F1F1] hover:bg-[#CF9CA0]"><i
+            class="text-[18px] ri-megaphone-line"></i> Awareness</a>
+      </nav>
+      <div class="flex justify-center lg:mb-6">
+        <a href="/admin_login" class="block underline text-center mt-[180px] lg:mt-[100px]">Continue as Admin <i
+            class="ri-contract-right-line"></i></a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <button id="openSidebar" class="lg:hidden text-2xl"><i class="ri-menu-line"></i></button>
+          <h2 id="dashboardHeading" class="text-lg sm:text-2xl lg:text-3xl font-medium">
+            Crime Dashboard – India
+          </h2>
+        </div>
+        <select id="citySelect" class="border px-4 py-2 rounded text-sm">
+          {% for city in cities %}
+          <option value="{{ city }}">{{ city }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Stats Grid -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
+        <div class="bg-white p-4 lg:p-6 rounded-xl shadow">
+          <h3 class="lg:text-lg font-semibold mb-2">Total Crimes Reported</h3>
+          <div class="flex mt-5 justify-between">
+            <p class="text-2xl lg:text-3xl font-bold counter" id="totalCrimes">0</p>
+            <i class="fas fa-chart-line text-red-700 text-2xl lg:text-3xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 lg:p-6 rounded-xl shadow">
+          <h3 class=" lg:text-lg font-semibold mb-2">Crimes in Last 24 Hours</h3>
+          <div class="flex justify-between mt-5">
+            <p class="text-2xl lg:text-3xl font-bold counter" id="last24Crimes">0</p>
+            <i class="fas fa-clock text-red-700 text-2xl lg:text-3xl"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow">
+          <h3 class="lg:text-lg font-semibold">Area Safety Score</h3>
+          <div class="flex items-center justify-between">
+            <div class="relative mt-1 w-16 h-16 lg:w-20 lg:h-20">
+              <svg class="w-full h-full transform -rotate-90">
+                <circle cx="40" cy="40" r="25" stroke="#e5e7eb" stroke-width="8" fill="transparent" />
+                <circle id="progressCircle" cx="40" cy="40" r="25" stroke="#22c55e" stroke-width="8" fill="transparent" stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round" />
+              </svg>
+              <div id="safetyScore" class="absolute inset-0 flex items-center justify-center text-xs lg:text-sm font-bold text-green-600">
+                0.0</div>
+            </div>
+            <i class="fas fa-shield-halved text-red-700 text-2xl lg:text-3xl"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Activities -->
+      <section class="bg-white p-4 lg:p-6 rounded-xl shadow mb-6">
+        <h3 class="lg:text-lg font-semibold mb-4 flex items-center gap-2">
+          <i class="fas fa-users text-red-700 text-2xl lg:text-3xl"></i> Recent Crime Reports
+        </h3>
+        <ul id="recentCrimesList" class="space-y-4 text-sm">
+          {% for crime in recent_reports %}
+          <li class="border-l-4 pl-4 ">
+            <strong>{{ crime['type'] }}</strong> – {{ crime['date'] }}<br />
+            <span class="text-gray-600">{{ crime['description'] }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <!-- Crime Type Summary -->
+      <section class="bg-white p-4 lg:p-6 rounded-xl shadow">
+        <h3 class="lg:text-lg font-semibold mb-4 flex items-center gap-2">
+          <i class="fas fa-tags text-red-700 text-xl lg:text-2xl"></i> Crime Types Breakdown
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+          {% for type in ["Theft","Robbery","Assault","Vandalism","Cybercrime","Drug Offense"] %}
+          <div class="bg-gray-200 flex p-3 lg:p-4 rounded">
+            <img src="/static/image/{{ type|replace(' ','%20') }}.webp" alt="" width="40px">
+            <div class="ms-3">
+              <p class="font-semibold text-[15px] lg:text-[16px]">{{ type }}</p>
+              <p class="counter text-[14px] lg:text-[15px]" data-type="{{ type }}">0 cases</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    let sidebar = document.getElementById("sidebar");
+    document.getElementById("openSidebar").addEventListener("click", () => {
+      sidebar.classList.add("active");
+    });
+    document.getElementById("closeSidebar").addEventListener("click", () => {
+      sidebar.classList.remove("active");
+    });
+
+    function animateCount(id, end, suffix = '') {
+      let ele = document.getElementById(id);
+      let current = 0;
+      let increment = Math.max(1, Math.ceil(end / 50));
+      let counter = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+          current = end;
+          clearInterval(counter);
+        }
+        ele.innerText = current + suffix;
+      }, 30);
+    }
+
+    function updateDashboard(city) {
+      document.getElementById("dashboardHeading").innerText = `Crime Dashboard – ${city}`;
+      fetch(`/city_stats/${city}`)
+        .then(res => res.json())
+        .then(data => {
+          animateCount("totalCrimes", data.total);
+          animateCount("last24Crimes", data.last24);
+          let circle = document.getElementById("progressCircle");
+          let text = document.getElementById("safetyScore");
+          let circumference = 2 * Math.PI * 25;
+          let safety = 0;
+          let interval = setInterval(() => {
+            safety += 0.1;
+            if (safety >= data.safety) {
+              safety = data.safety;
+              clearInterval(interval);
+            }
+            text.innerText = safety.toFixed(1);
+            text.style.color = safety < 4 ? "red" : safety < 7 ? "orange" : "green";
+            circle.style.strokeDashoffset = circumference - (safety / 10) * circumference;
+          }, 20);
+
+          document.querySelectorAll(".counter[data-type]").forEach(el => {
+            let type = el.getAttribute("data-type");
+            let count = data.breakdown[type] || 0;
+            let id = `counter_${type}`; 
+            el.setAttribute("id", id);
+            animateCount(id, count, " cases");
+          });
+
+        });
+
+      fetch(`/recent_crimes/${city}`)
+        .then(res => res.json())
+        .then(crimes => {
+          let list = document.getElementById("recentCrimesList");
+          list.innerHTML = "";
+          crimes.forEach(crime => {
+            let li = document.createElement("li");
+            li.className = "border-l-4 pl-4 ";
+            li.innerHTML = `<strong>${crime.type}</strong> – ${crime.date}<br/>
+              <span class="text-gray-600">${crime.description}</span>`;
+            list.appendChild(li);
+          });
+        });
+    }
+
+    document.getElementById("citySelect").addEventListener("change", function () {
+      updateDashboard(this.value);
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      let select = document.getElementById("citySelect");
+      if (select && select.options.length > 0) {
+        updateDashboard(select.value);
+      }
+    });
+  </script>
+</body>
+
+</html>
