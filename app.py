@@ -34,7 +34,7 @@ def dashboard():
     ).fetchall()]
     conn.close()
     cities.insert(0, "India")  
-    return render_template("dashboard.html", cities=cities)
+    return render_template("index.html", cities=cities)
 
 @app.route("/city_stats/<city>")
 def city_stats(city):
@@ -184,7 +184,7 @@ def admin_dashboard():
 def admin_logout():
     session.clear()
     # flash("Logged out successfully", "info")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("index"))
 
 @app.route("/verify/<int:report_id>", methods=["POST"])
 def verify_report(report_id):
